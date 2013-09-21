@@ -2,18 +2,19 @@
 var CANVASHEIGHT;
 var CANVASWIDTH;
 var incident;
-var INCIDENTRAYSNUMBER = 10;
+var LINESPEED = 0.6;
+var INCIDENTRAYSNUMBER = 60;
 var INCIDENTRAYSPREAD = 70;
 var incidencepointx;
 var incidencepointy;
 var prismrays;
-var PRISMRAYSSPREAD = 150;
+var PRISMRAYSSPREAD = 80;
 var prismrayscenterx;
 var prismrayscentery;
 
 // Controls the fading
 var FADINGRESOLUTION = 100;
-var FADINGPOINT = 0.75;// PERCENTAGE
+var FADINGPOINT = 0.8;// PERCENTAGE
 
 // Useful variables
 var thisline;
@@ -22,20 +23,34 @@ var fadingpointx;
 var fadingpointy;
 var tractlengthx;
 var tractlengthy;
+var canvas;
 // Fires when the document is fully loaded
 $(document).ready(function(){
-	var canvas = $("#animation").get(0);
+	canvas = $("#animation").get(0);
 	var ctx = canvas.getContext("2d");
 	CANVASHEIGHT = canvas.height;
 	CANVASWIDTH = canvas.width;
-	drawPrism(ctx);
 	incidencepointx = CANVASWIDTH/9+CANVASWIDTH/3;
 	// Don't ask. Trigonometry is awesome.
 	incidencepointy = (4*CANVASHEIGHT-Math.sqrt(3)*CANVASWIDTH)/6+CANVASWIDTH*Math.sqrt(3)/6-2*CANVASWIDTH/9*Math.sqrt(3)/2;
 	initialize();
+	drawPrism(ctx);
 	printIncidentLines(ctx);
 	printPrismLines(ctx);
+	animate(ctx);
 });
+
+// Animation
+function animate(ctx) {
+	clear(ctx); 
+	drawPrism(ctx);
+	updateIncidentLines(ctx);
+	printIncidentLines(ctx);
+	updatePrismLines(ctx);
+	printPrismLines(ctx);
+	
+	requestAnimationFrame(function() {animate(ctx)} );
+}
 
 // Pretty self explainatory
 function drawPrism(ctx) {
@@ -54,7 +69,7 @@ function initialize() {
 	// The white, incident ray is composed with various lines
 	incident = new Array(INCIDENTRAYSNUMBER);
 	for (var i = 0; i < INCIDENTRAYSNUMBER; i++) {
-		incident[i] = new line(0, Math.random()*INCIDENTRAYSPREAD+CANVASHEIGHT*(2/3)-10, incidencepointx, incidencepointy, "#FFFFFF", 1);
+		incident[i] = new line(0, Math.random()*INCIDENTRAYSPREAD+CANVASHEIGHT*(2/3)-(INCIDENTRAYSPREAD/2), incidencepointx, incidencepointy, "#FFFFFF", 1);
 		//console.log(incident[i]);
 	}
 	// The rays in the prism
@@ -103,6 +118,33 @@ function printPrismLines(ctx) {
 	ctx.globalAlpha = 1;
 }
 
+// Function to update the matrix with the next step of movement
+function updateIncidentLines() {
+
+	for (var i = 0; i < INCIDENTRAYSNUMBER; i++) {
+		thisline = incident[i];
+		thisline.starty += Math.random() * LINESPEED * thisline.direction;
+		if (thisline.starty < CANVASHEIGHT*(2/3)-(INCIDENTRAYSPREAD/2))
+			thisline.direction = 1;
+		if (thisline.starty > CANVASHEIGHT*(2/3)+(INCIDENTRAYSPREAD/2))
+			thisline.direction = -1;
+		//console.log(incident[i]);
+	}
+}
+
+function updatePrismLines() {
+		for (var i = 0; i < INCIDENTRAYSNUMBER; i++) {
+		thisline = prismrays[i];
+		randommultiplier = Math.random();
+		thisline.endy += randommultiplier * LINESPEED * thisline.direction;
+		//thisline.endx += randommultiplier * LINESPEED * thisline.direction * (-1);
+		if (thisline.endy < incidencepointy-PRISMRAYSSPREAD/4*Math.sqrt(3))
+			thisline.direction = 1;
+		if (thisline.endy > incidencepointy+PRISMRAYSSPREAD/4*Math.sqrt(3))
+			thisline.direction = -1;
+		//console.log(incident[i]);
+	}
+}
 // The line object
 function line(startx, starty, endx, endy, color, width) {
 	this.startx = startx;
@@ -111,4 +153,11 @@ function line(startx, starty, endx, endy, color, width) {
 	this.endy = endy;
 	this.color = color;
 	this.width = width;
+	this.direction = Math.floor(Math.random()*2)*2-1; //random moving down (-1) or up (1)
+
+}
+
+// Clears things
+function clear(ctx) {
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
