@@ -21,6 +21,8 @@
  * 
  */
  
+// Warning: this code needs heavy refactoring and aid to readability
+ 
 // Variables
 var CANVASHEIGHT;
 var CANVASWIDTH;
@@ -40,6 +42,7 @@ var COLORSPREAD = 300;
 var COLORNUMBER = 7;
 var MAXCOLORWIDTH = (COLORSPREAD/(COLORNUMBER-1))/2;
 var colors = new Array("#FF0000","#FF7F00","#FFFF00","#00FF00","#0000FF","#4B0082");
+//var colors = new Array("#E74C3C","#E67E22", "#F1C40F", "#2ECC71", "#3498DB", "#9B59B6");
 
 // Controls the fading
 var FADINGRESOLUTION = 20;
